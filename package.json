@@ -1,0 +1,28 @@
+{
+  "name": "cache-out",
+  "version": "0.0.1",
+  "description": "A response caching tool for those slow/flaky services that power our express apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brantstuns/cache-out.git"
+  },
+  "keywords": [
+    "cache",
+    "node",
+    "express",
+    "request",
+    "response",
+    "redis",
+    "service"
+  ],
+  "author": "Brant Stuns",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brantstuns/cache-out/issues"
+  },
+  "homepage": "https://github.com/brantstuns/cache-out#readme"
+}
