@@ -3,8 +3,11 @@
   "version": "0.0.1",
   "description": "A response caching tool for those slow/flaky services that power our express apps",
   "main": "index.js",
+  "engines": {
+    "node": "6.4.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./tests/**/*Test.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +27,13 @@
   "bugs": {
     "url": "https://github.com/brantstuns/cache-out/issues"
   },
-  "homepage": "https://github.com/brantstuns/cache-out#readme"
+  "homepage": "https://github.com/brantstuns/cache-out#readme",
+  "dependencies": {
+    "ioredis": "^2.5.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7"
+  }
 }
