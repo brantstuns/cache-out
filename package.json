@@ -7,7 +7,7 @@
     "node": "6.4.0"
   },
   "scripts": {
-    "test": "./node_modules/.bin/istanbul cover _mocha ./tests/**/*Test.js",
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./tests/**/*Test.js",
     "testc": "npm test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf coverage/"
   },
   "repository": {
