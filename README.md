@@ -1,2 +1,2 @@
-[![codecov](https://codecov.io/gh/brantstuns/cache-out/branch/master/graph/badge.svg)](https://codecov.io/gh/brantstuns/cache-out)
+[![Coverage Status](https://coveralls.io/repos/github/brantstuns/cache-out/badge.svg?branch=master)](https://coveralls.io/github/brantstuns/cache-out?branch=master)
 # Cache Out 💸

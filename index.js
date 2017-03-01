@@ -1,4 +1,4 @@
-const redis = require('ioredis');
+var redis = require('ioredis');
 
 module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
   const port = storeConfig.port || storeConfig.options.port;
@@ -19,12 +19,9 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
 
   return new Promise((resolve, reject) => {
     if (reqMethod === 'get') {
-      console.log('made it here')
       redisClient.get(endpoint)
         .then(data => {
-          console.log('db lookp a success ', data);
           if (!data) {
-            console.log('was not found in redis')
             req(reqOptions).then(res => {
               redisClient.setex(endpoint, secondsToCache, JSON.stringify({body: res.body, statusCode: res.statusCode})) // 86400 is 24 hours in seconds
                 .then(works => resolve(res));
