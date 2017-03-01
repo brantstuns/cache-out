@@ -1,7 +1,5 @@
 language: node_js
 node_js:
 - node
-install:
-  - npm i -g codecov
 script:
   - npm run testc
