@@ -1,5 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/brantstuns/cache-out/badge.svg?branch=master)](https://coveralls.io/github/brantstuns/cache-out?branch=master)
 [![Build Status](https://travis-ci.org/brantstuns/cache-out.svg?branch=master)](https://travis-ci.org/brantstuns/cache-out)
+[![npm version](https://badge.fury.io/js/cache-out.svg)](https://badge.fury.io/js/cache-out)
+[![Dependency Status](https://david-dm.org/brantstuns/cache-out.svg)](https://david-dm.org/boennemann/badges)
 # Cache Out 💸
 
 Lets be honest. Slow responding, flaky, and fluctuating services really hurt. They hurt everyone from our apps' users to our apps' hard working developers. Caching their responses is a great way to mitigate this pain. 
