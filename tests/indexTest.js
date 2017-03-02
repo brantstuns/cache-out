@@ -8,9 +8,11 @@ const index = rewire('../index');
 chai.use(sinonChai);
 sinonStubPromise(sinon);
 
-describe('cache-out ', function() {
-  beforeEach(function() {
+describe('When calling cache-out ', function () {
+  beforeEach(function () {
     this.redisOptions = {port: 1111, host: 'localhost', db: '0', password: ''};
+
+    this.defaultTTL = 86400;
 
     this.redisClientStub = sinon.stub();
     this.redisClientStub.prototype.get = sinon.stub();
@@ -22,12 +24,12 @@ describe('cache-out ', function() {
     this.unwireConsole = index.__set__('console', this.consoleStub);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.unwireIndex();
     this.unwireConsole();
   });
 
-  describe('and the request is a GET ', function() {
+  describe('and the request is a GET ', function () {
     beforeEach(function () {
       this.requestClientStub = sinon.stub();
       this.requestOptions = {
@@ -36,40 +38,70 @@ describe('cache-out ', function() {
       };
     });
 
-    it('it should call get on the redisClient with the endpoint', function (done) {
+    it('it should call get on the redisClient with the endpoint', function () {
       this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
-      index(this.requestClientStub, this.requestOptions, this.redisOptions)
+      return index(this.requestClientStub, this.requestOptions, this.redisOptions)
         .then(() => {
           expect(this.redisClientStub.prototype.get).to.have.been.calledWith(this.requestOptions.url);
-          done();
         });
     });
 
     describe('and something throws an error ', function () {
-      it('it should just make the request and return the response', function (done) {
+      it('it should just make the request and return the response', function () {
+        const url = this.requestOptions.url;
+
         this.redisClientStub.prototype.get.returnsPromise().rejects('the worst error ever');
         this.requestClientStub.returnsPromise().resolves(`{"nice": "service response when redis broke"}`);
 
-        index(this.requestClientStub, this.requestOptions, this.redisOptions)
+        return index(this.requestClientStub, this.requestOptions, this.redisOptions)
           .then(() => {
-            expect(this.redisClientStub.prototype.get).to.have.been.calledWith(this.requestOptions.url);
-            done();
+            expect(this.redisClientStub.prototype.get).to.have.been.calledWith(url);
           });
       });
     });
 
     describe('and there is no cached response in redis ', function () {
-      it('it should call the passed request with the passed requestOptions', function (done) {
+      it('it should call the passed request with the passed requestOptions', function () {
         this.redisClientStub.prototype.get.returnsPromise().resolves('');
         this.requestClientStub.returnsPromise().resolves(`{"nice": "service response"}`);
         this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
 
-        index(this.requestClientStub, this.requestOptions, this.redisOptions)
+        return index(this.requestClientStub, this.requestOptions, this.redisOptions)
           .then(() => {
             expect(this.requestClientStub).to.have.been.calledWith(this.requestOptions);
-            done();
           });
       });
+
+      it('it should cache the service response in redis using setex', function () {
+        const url = this.requestOptions.url;
+        const res = {body: 'service response', statusCode: 200};
+        const stringifiedRes = JSON.stringify(res);
+
+        this.redisClientStub.prototype.get.returnsPromise().resolves('');
+        this.requestClientStub.returnsPromise().resolves(res);
+        this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
+
+        return index(this.requestClientStub, this.requestOptions, this.redisOptions)
+          .then(() => {
+            expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(url, this.defaultTTL, stringifiedRes);
+          });
+      });
+
+      it('it should call setex with the passed time to live for the cached response', function () {
+        const url = this.requestOptions.url;
+        const res = {body: 'service response', statusCode: 200};
+        const stringifiedRes = JSON.stringify(res);
+
+        this.redisClientStub.prototype.get.returnsPromise().resolves('');
+        this.requestClientStub.returnsPromise().resolves(res);
+        this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
+
+        return index(this.requestClientStub, this.requestOptions, this.redisOptions, 1111)
+          .then(() => {
+            expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(url, 1111, stringifiedRes);
+          });
+      });
+
     });
   });
 });
