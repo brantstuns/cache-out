@@ -1,16 +1,12 @@
 var redis = require('ioredis');
 
 module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
-  const port = storeConfig.port || storeConfig.options.port;
-  const host = storeConfig.host || storeConfig.options.host;
-  const db =  storeConfig.db;
-  const password = storeConfig.password;
   let redisClient;
 
-  if (!port || !host) {
-     redisClient = new redis();
-  } else if (db || password) {
-    redisClient = new redis(port, host, {db, password})
+  if (!storeConfig || (Object.keys(storeConfig).length === 0 && obj.constructor === Object)) {
+    redisClient = new redis();
+  } else {
+    redisClient = new redis(storeConfig);
   }
 
   const reqMethod = reqOptions.method.toLowerCase();
@@ -23,8 +19,14 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
         .then(data => {
           if (!data) {
             req(reqOptions).then(res => {
-              redisClient.setex(endpoint, secondsToCache, JSON.stringify({body: res.body, statusCode: res.statusCode})) // 86400 is 24 hours in seconds
-                .then(works => resolve(res));
+              let redisResponseString;
+              if (res.body) {
+                redisResponseString = JSON.stringify({body: res.body, statusCode: res.statusCode});
+              } else {
+                redisResponseString = res;
+              }
+              redisClient.setex(endpoint, secondsToCache, redisResponseString) // 86400 is 24 hours in seconds
+                .then(works => resolve(redisResponseString));
             });
           } else {
             resolve(JSON.parse(data));
