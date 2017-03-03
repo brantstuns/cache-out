@@ -20,7 +20,7 @@ npm i cache-out
 var cacheOut = require('cache-out');
 var request = require('request-promise');
 var requestOpts = {url: 'http://www.slowservice.com/uncool/why/do/you/have/to/be/that/way', method: 'GET'};
-var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''};
+var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''}; // Must follow this format to work: https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
 
 cacheOut(request, requestOpts, redisConfig, 604800 // optional time in seconds to cache response)
   .then((res) => console.log('Wow, that was so fast! ', res));
