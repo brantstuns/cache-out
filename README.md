@@ -28,7 +28,3 @@ cacheOut(request, requestOpts, redisConfig, 604800 // optional time in seconds t
 ```
 
 More to come...
-
-**Please help contribute! 💻**
-
-![cache-out](http://i.giphy.com/3oz8xZGfHArTvh99YI.gif)
