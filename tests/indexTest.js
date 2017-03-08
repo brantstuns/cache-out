@@ -57,12 +57,24 @@ describe('When calling cache-out ', function () {
       };
     });
 
-    it('it should call get on the redisClient with the endpoint', function () {
-      this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
-      return index(this.requestMethod, this.requestOptions, this.redisOptions)
-        .then(() => {
-          expect(this.redisClientStub.prototype.get).to.have.been.calledWith(this.requestOptions.url);
-        });
+    describe('and the response is cached in redis', function () {
+      it('it should call get on the redisClient with the endpoint', function () {
+        this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
+        return index(this.requestMethod, this.requestOptions, this.redisOptions)
+          .then(() => {
+            expect(this.redisClientStub.prototype.get).to.have.been.calledWith(this.requestOptions.url);
+          });
+      });
+
+      it('it should use the cached response in redis and not make a new request to the service', function () {
+        this.redisClientStub.prototype.get.returnsPromise().resolves(JSON.stringify({body: 'cached response', status: '200'}));
+        this.requestMethod.returnsPromise().resolves(`{"nice": "service response"}`);
+
+        return index(this.requestMethod, this.requestOptions, this.redisOptions)
+          .then(() => {
+            expect(this.requestMethod).not.to.have.been.called;
+          });
+      });
     });
 
     describe('and something throws an error ', function () {
@@ -86,7 +98,7 @@ describe('When calling cache-out ', function () {
         this.url = this.requestOptions.url;
       });
 
-      describe('and an option showing the full response was passed to the request', function () {
+      describe('and an option to show the full response was passed to the request', function () {
         it('it should call the passed request with the passed requestOptions', function () {
           this.redisClientStub.prototype.get.returnsPromise().resolves('');
           this.requestMethod.returnsPromise().resolves(`{"nice": "service response"}`);
@@ -125,6 +137,21 @@ describe('When calling cache-out ', function () {
               expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(this.url, 1111, expectedStringifiedRes);
             });
         });
+
+        it('it should return the service response as is and not be the stringified response stored in redis', function () {
+          const res = {body: {serviceStuff: 'service response'}, statusCode: 200, crap: 'dont cache this key'};
+          const expectedStringifiedRes = JSON.stringify({body: res.body, statusCode: res.statusCode});
+
+          this.redisClientStub.prototype.get.returnsPromise().resolves('');
+          this.requestMethod.returnsPromise().resolves(res);
+          this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
+
+          return index(this.requestMethod, this.requestOptions, this.redisOptions, 1111)
+            .then((response) => {
+              expect(response).to.equal(res);
+              expect(response).not.to.equal(expectedStringifiedRes);
+            });
+        });
       });
 
       it('it should call setex with the response from the passed request function', function () {
@@ -137,6 +164,19 @@ describe('When calling cache-out ', function () {
         return index(this.requestMethod, this.requestOptions, this.redisOptions)
           .then(() => {
             expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(this.url, this.defaultTTL, res);
+          });
+      });
+
+      it('it should the response body string that is also stored in redis', function () {
+        const res = JSON.stringify({some: 'test', response: {json: {to: 'mock the', service: 'call'}}});
+
+        this.redisClientStub.prototype.get.returnsPromise().resolves('');
+        this.requestMethod.returnsPromise().resolves(res);
+        this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
+
+        return index(this.requestMethod, this.requestOptions, this.redisOptions)
+          .then((response) => {
+            expect(response).to.equal(res);
           });
       });
     });

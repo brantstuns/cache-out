@@ -26,7 +26,7 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
                 redisResponseString = res;
               }
               redisClient.setex(endpoint, secondsToCache, redisResponseString) // 86400 is 24 hours in seconds
-                .then(works => resolve(redisResponseString));
+                .then(() => resolve(res));
             });
           } else {
             resolve(JSON.parse(data));
