@@ -1,6 +1,6 @@
 {
   "name": "cache-out",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "A response caching tool for those slow/flaky services that power our express apps",
   "main": "index.js",
   "engines": {

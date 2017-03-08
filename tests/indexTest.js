@@ -14,6 +14,8 @@ describe('When calling cache-out ', function () {
 
     this.defaultTTL = 86400;
 
+    this.requestMethod = sinon.stub();
+
     this.redisClientStub = sinon.stub();
     this.redisClientStub.prototype.get = sinon.stub();
     this.redisClientStub.prototype.setex = sinon.stub();
@@ -29,9 +31,26 @@ describe('When calling cache-out ', function () {
     this.unwireConsole();
   });
 
+  describe('it should initialize everything properly ', function () {
+    it('by creating a default instance of ioredis if an empty object is passed as the storeConfig', function () {
+      this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
+      return index(this.requestMethod, {method: 'get', uri: 'cool url'}, {})
+        .then(() => {
+          expect(this.redisClientStub).not.to.have.been.calledWith({});
+        });
+    });
+
+    it('by catching the url in the request options by the keys: url uri or endpoint', function () {
+      this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
+      return index(this.requestMethod, {method: 'get', endpoint: 'cool url'}, {})
+        .then(() => {
+          expect(this.redisClientStub).not.to.have.been.calledWith({});
+        });
+    });
+  });
+
   describe('and the request is a GET ', function () {
     beforeEach(function () {
-      this.requestClientStub = sinon.stub();
       this.requestOptions = {
         method: 'GET',
         url: 'veryreliableandfastserviceurl.com'
@@ -40,7 +59,7 @@ describe('When calling cache-out ', function () {
 
     it('it should call get on the redisClient with the endpoint', function () {
       this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
-      return index(this.requestClientStub, this.requestOptions, this.redisOptions)
+      return index(this.requestMethod, this.requestOptions, this.redisOptions)
         .then(() => {
           expect(this.redisClientStub.prototype.get).to.have.been.calledWith(this.requestOptions.url);
         });
@@ -49,13 +68,15 @@ describe('When calling cache-out ', function () {
     describe('and something throws an error ', function () {
       it('it should just make the request and return the response', function () {
         const url = this.requestOptions.url;
+        const res = `{"nice": "service response when redis broke"}`;
 
         this.redisClientStub.prototype.get.returnsPromise().rejects('the worst error ever');
-        this.requestClientStub.returnsPromise().resolves(`{"nice": "service response when redis broke"}`);
+        this.requestMethod.returnsPromise().resolves(res);
 
-        return index(this.requestClientStub, this.requestOptions, this.redisOptions)
-          .then(() => {
+        return index(this.requestMethod, this.requestOptions, this.redisOptions)
+          .then((resolvedValue) => {
             expect(this.redisClientStub.prototype.get).to.have.been.calledWith(url);
+            expect(resolvedValue).to.equal(res);
           });
       });
     });
@@ -68,12 +89,12 @@ describe('When calling cache-out ', function () {
       describe('and an option showing the full response was passed to the request', function () {
         it('it should call the passed request with the passed requestOptions', function () {
           this.redisClientStub.prototype.get.returnsPromise().resolves('');
-          this.requestClientStub.returnsPromise().resolves(`{"nice": "service response"}`);
+          this.requestMethod.returnsPromise().resolves(`{"nice": "service response"}`);
           this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
 
-          return index(this.requestClientStub, this.requestOptions, this.redisOptions)
+          return index(this.requestMethod, this.requestOptions, this.redisOptions)
             .then(() => {
-              expect(this.requestClientStub).to.have.been.calledWith(this.requestOptions);
+              expect(this.requestMethod).to.have.been.calledWith(this.requestOptions);
             });
         });
 
@@ -82,10 +103,10 @@ describe('When calling cache-out ', function () {
           const expectedStringifiedRes = JSON.stringify({body: res.body, statusCode: res.statusCode});
 
           this.redisClientStub.prototype.get.returnsPromise().resolves('');
-          this.requestClientStub.returnsPromise().resolves(res);
+          this.requestMethod.returnsPromise().resolves(res);
           this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
 
-          return index(this.requestClientStub, this.requestOptions, this.redisOptions)
+          return index(this.requestMethod, this.requestOptions, this.redisOptions)
             .then(() => {
               expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(this.url, this.defaultTTL, expectedStringifiedRes);
             });
@@ -96,10 +117,10 @@ describe('When calling cache-out ', function () {
           const expectedStringifiedRes = JSON.stringify({body: res.body, statusCode: res.statusCode});
 
           this.redisClientStub.prototype.get.returnsPromise().resolves('');
-          this.requestClientStub.returnsPromise().resolves(res);
+          this.requestMethod.returnsPromise().resolves(res);
           this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
 
-          return index(this.requestClientStub, this.requestOptions, this.redisOptions, 1111)
+          return index(this.requestMethod, this.requestOptions, this.redisOptions, 1111)
             .then(() => {
               expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(this.url, 1111, expectedStringifiedRes);
             });
@@ -110,14 +131,42 @@ describe('When calling cache-out ', function () {
         const res = JSON.stringify({some: 'test', response: {json: {to: 'mock the', service: 'call'}}});
 
         this.redisClientStub.prototype.get.returnsPromise().resolves('');
-        this.requestClientStub.returnsPromise().resolves(res);
+        this.requestMethod.returnsPromise().resolves(res);
         this.redisClientStub.prototype.setex.returnsPromise().resolves('cached response in redis');
 
-        return index(this.requestClientStub, this.requestOptions, this.redisOptions)
+        return index(this.requestMethod, this.requestOptions, this.redisOptions)
           .then(() => {
             expect(this.redisClientStub.prototype.setex).to.have.been.calledWith(this.url, this.defaultTTL, res);
           });
       });
+    });
+  });
+
+  describe('and the request method is something else ', function () {
+    beforeEach(function () {
+      this.requestOptions = {
+        method: 'POST',
+        url: 'veryreliableandfastserviceurl.com',
+        body: {nice: 'request body'}
+      };
+    });
+
+    it('it should just call the request method with the request passed to cache-out, POST support coming soon', function () {
+      this.requestMethod.returnsPromise().resolves(`{"nice": "service response"}`);
+
+      return index(this.requestMethod, this.requestOptions)
+        .then(() => {
+          expect(this.requestMethod).to.have.been.calledWith(this.requestOptions);
+        });
+    });
+
+    it('if there is an error with the request resolve with that error', function () {
+      this.requestMethod.returnsPromise().rejects(`the worst error possible`);
+
+      return index(this.requestMethod, this.requestOptions, this.redisOptions)
+        .then((response) => {
+          expect(response).to.equal('the worst error possible');
+        });
     });
   });
 });

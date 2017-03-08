@@ -3,13 +3,13 @@ var redis = require('ioredis');
 module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
   let redisClient;
 
-  if (!storeConfig || (Object.keys(storeConfig).length === 0 && obj.constructor === Object)) {
+  if (!storeConfig || (Object.keys(storeConfig).length === 0 && storeConfig.constructor === Object)) {
     redisClient = new redis();
   } else {
     redisClient = new redis(storeConfig);
   }
 
-  const reqMethod = reqOptions.method.toLowerCase();
+  const reqMethod = reqOptions.method && reqOptions.method.toLowerCase();
   const endpoint = reqOptions.url || reqOptions.uri || reqOptions.endpoint;
   const reqBody = reqOptions.body;
 
@@ -37,5 +37,10 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
           req(reqOptions).then(res => resolve(res));
         });
     }
-  })
+    else {
+      req(reqOptions)
+        .then(response => resolve(response))
+        .catch(err => resolve(err));
+    }
+  });
 };
