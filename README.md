@@ -2,29 +2,35 @@
 [![Build Status](https://travis-ci.org/brantstuns/cache-out.svg?branch=master)](https://travis-ci.org/brantstuns/cache-out)
 [![npm version](https://badge.fury.io/js/cache-out.svg)](https://badge.fury.io/js/cache-out)
 [![Dependency Status](https://david-dm.org/brantstuns/cache-out.svg)](https://david-dm.org/boennemann/badges)
-[![NPM](https://nodei.co/npm/cache-out.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/cache-out/)
-# Cache Out 💸
 
-Lets be honest. Slow responding, flaky, and fluctuating services really hurt. They hurt everyone from our apps' users to our apps' hard working developers. Caching their responses is a great way to mitigate this pain. 
+# 💶 💷 Cache Out 💵 💴
+Cache out is simple tool to use in place of your service requests that will cache service responses for a specified time so all your users don't have to have a bad day because one of your services is. 
 
-Cache out is simple tool to use in place of your service requests that will cache service responses for a specified time so all your users don't have to have a bad day because one of your services is having a bad day 🤠. 
-
-It is backed by Redis so you will have to have a Redis instance running for this work! It also uses ES6 and supports promises!
+It is backed by Redis so you will have to have a Redis instance running for this work! It also uses ES6 and returns a promise!
 
 ## Install:
 ```
 npm i cache-out
 ```
+## API:
+### cache-out(requestMethod, requestOptions, [redisOptions], [secondsToCache])
+Calls your requestMethod with the requestOptions and caches the response in redis for the secondsToCache. If something goes wrong it's just a call through to your request.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| requestMethod | function | _required_ | the function that you would be replacing cache-out with (ex [request-promise-native](https://github.com/request/request-promise-native) |
+| requestOptions | object | _required_ | the options object you would be passing to the function above |
+| redisOptions | object | defaults as specified in the link | this is not required but if you want to specify you're redis setup (which you definitely are going to have to do at some point) then make sure it follows the [options object](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) specified for ioredis |
+| secondsToCache | number | 86400 (which 24 hours in seconds) | The amount of time in seconds you want to cache the response in redis for |
 
 ## Example useage:
 ```javascript
 var cacheOut = require('cache-out');
 var request = require('request-promise');
-var requestOpts = {url: 'http://www.slowservice.com/uncool/why/do/you/have/to/be/that/way', method: 'GET'};
-var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''}; // Must follow this format to work: https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
+var requestOpts = {url: 'http://www.slowservice.com/uncool/why/', method: 'GET'};
+var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''}; 
 
 cacheOut(request, requestOpts, redisConfig, 604800 // optional time in seconds to cache response)
   .then((res) => console.log('Wow, that was so fast! ', res));
 ```
-
-More to come...
+💰
