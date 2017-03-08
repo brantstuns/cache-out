@@ -15,7 +15,9 @@ npm i cache-out --save
 
 ## API:
 ### cache-out(requestMethod, requestOptions, [redisOptions], [secondsToCache])
-Calls your requestMethod with the requestOptions and caches the response in redis for the secondsToCache. If something goes wrong it's just a call through to your request.
+
+###### Calls your requestMethod with the requestOptions and caches the response in redis for the secondsToCache. If something goes wrong it's just a call through to your request.
+
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
