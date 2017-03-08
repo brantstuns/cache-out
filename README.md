@@ -10,8 +10,9 @@ It is backed by Redis so you will have to have a Redis instance running for this
 
 ## Install:
 ```
-npm i cache-out
+npm i cache-out --save
 ```
+
 ## API:
 ### cache-out(requestMethod, requestOptions, [redisOptions], [secondsToCache])
 Calls your requestMethod with the requestOptions and caches the response in redis for the secondsToCache. If something goes wrong it's just a call through to your request.
@@ -27,10 +28,10 @@ Calls your requestMethod with the requestOptions and caches the response in redi
 ```javascript
 var cacheOut = require('cache-out');
 var request = require('request-promise');
-var requestOpts = {url: 'http://www.slowservice.com/uncool/why/', method: 'GET'};
+var requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
 var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''}; 
 
-cacheOut(request, requestOpts, redisConfig, 604800 // optional time in seconds to cache response)
-  .then((res) => console.log('Wow, that was so fast! ', res));
+cacheOut(request, requestOpts, redisConfig, 604800)
+  .then((res) => console.log('Wow, that was fast! ', res));
 ```
 💰
