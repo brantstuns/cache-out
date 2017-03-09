@@ -5,6 +5,8 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
 
   if (!storeConfig || (Object.keys(storeConfig).length === 0 && storeConfig.constructor === Object)) {
     redisClient = new redis();
+  } else if (typeof storeConfig.get === 'function') {
+    redisClient = storeConfig;
   } else {
     redisClient = new redis(storeConfig);
   }

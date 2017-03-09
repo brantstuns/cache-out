@@ -40,6 +40,14 @@ describe('When calling cache-out ', function () {
         });
     });
 
+    it('by using the passed in redis client if storeConfig is a pre instantiated client', function () {
+      const redisClient = {get: () => Promise.resolve(JSON.stringify({test: 'client'}))};
+      return index(this.requestMethod, {method: 'get', uri: 'cool url'}, redisClient)
+        .then((res) => {
+          expect(res.test).to.equal('client');
+        });
+    });
+    
     it('by catching the url in the request options by the keys: url uri or endpoint', function () {
       this.redisClientStub.prototype.get.returnsPromise().resolves(`{"nice": "cached response"}`);
       return index(this.requestMethod, {method: 'get', endpoint: 'cool url'}, {})
