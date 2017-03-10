@@ -23,7 +23,7 @@ npm i cache-out --save
 | --- | --- | --- | --- |
 | requestMethod | function | _required_ | the function that you would be replacing cache-out with (ex [request-promise-native](https://github.com/request/request-promise-native) |
 | requestOptions | object | _required_ | the options object you would be passing to the function above |
-| redisOptions | object | defaults as specified in the link | this is not required but if you want to specify you're redis setup (which you definitely are going to have to do at some point) then make sure it follows the [options object](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) specified for ioredis |
+| redisOptions | object | If no argument is passed a default ioredis client will be created | this is not required but if you want to specify you're redis setup (which you definitely are going to have to do at some point) then make sure it follows the [options object](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) specified for ioredis. Alternatively, you can pass in a pre instantiated redis client here too! Cache-out will use the passed in client if this is the case. |
 | secondsToCache | number | 86400 (which 24 hours in seconds) | The amount of time in seconds you want to cache the response in redis for |
 
 ## Example useage:
@@ -31,9 +31,14 @@ npm i cache-out --save
 var cacheOut = require('cache-out');
 var request = require('request-promise');
 var requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
-var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''}; 
+var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''};
 
 cacheOut(request, requestOpts, redisConfig, 604800)
   .then((res) => console.log('Wow, that was fast! ', res));
 ```
+
+## Testing:
+
+The redisOptions argument accepts a redis client instead of just a config object. I recommend using a [mock redis client](https://github.com/stipsan/ioredis-mock) and passing this into cache-out if your NODE_ENV === 'test'.
+
 💰
