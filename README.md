@@ -28,17 +28,45 @@ npm i cache-out --save
 
 ## Example useage:
 ```javascript
-var cacheOut = require('cache-out');
-var request = require('request-promise');
-var requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
-var redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''};
+const cacheOut = require('cache-out');
+const request = require('request-promise');
+const requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
+const redisConfig = {port: 6379, host: 'localhost', db: 0, password: ''};
 
 cacheOut(request, requestOpts, redisConfig, 604800)
   .then((res) => console.log('Wow, that was fast! ', res));
+  
+//
+// This is also valid!
+//
+
+const cacheOut = require('cache-out');
+const request = require('request-promise');
+const requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
+const ioredis = require('ioredis');
+const redisClient = new ioredis({port: 6379, host: 'localhost', db: 0, password: ''});
+
+cacheOut(request, requestOpts, ioredis, 604800)
+  .then((res) => console.log('Nice, you used your own redis client! ', res));
+  
+//
+// Don't worry, you can also use cache-out without ioredis!
+//
+
+const cacheOut = require('cache-out');
+const request = require('request-promise');
+const requestOpts = {url: 'http://www.url.com/uncool/why/', method: 'GET'};
+const redis = require('redis');
+const redisClient = redis.createClient({port: 6379, host: 'localhost', db: 0, password: ''});
+
+cacheOut(request, requestOpts, ioredis, 604800)
+  .then((res) => console.log('Nice, you are not using ioredis! ', res));
 ```
 
 ## Testing:
 
-The redisOptions argument accepts a redis client. I recommend using a [mock redis client](https://github.com/stipsan/ioredis-mock) and passing this into cache-out if your NODE_ENV === 'test'.
+I recommend using a [mock redis client](https://github.com/stipsan/ioredis-mock) and passing this into cache-out if your NODE_ENV === 'test'.
 
-💰
+Thanks! 🐕
+
+![nice code](http://i.giphy.com/26AHONQ79FdWZhAI0.gif)
