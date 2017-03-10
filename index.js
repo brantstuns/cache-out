@@ -1,3 +1,4 @@
+'use strict';
 var redis = require('ioredis');
 
 module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {

@@ -2,7 +2,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
-const sinonStubPromise = require('sinon-stub-promise')
+const sinonStubPromise = require('sinon-stub-promise');
 const rewire = require('rewire');
 const index = rewire('../index');
 chai.use(sinonChai);
