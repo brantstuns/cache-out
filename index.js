@@ -14,7 +14,6 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
 
   const reqMethod = reqOptions.method && reqOptions.method.toLowerCase();
   const endpoint = reqOptions.url || reqOptions.uri || reqOptions.endpoint;
-  const reqBody = reqOptions.body;
 
   return new Promise((resolve, reject) => {
     if (reqMethod === 'get') {
@@ -22,28 +21,26 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
         .then(data => {
           if (!data) {
             req(reqOptions).then(res => {
-              let redisResponseString;
-              if (res.body) {
-                redisResponseString = JSON.stringify({body: res.body, statusCode: res.statusCode});
-              } else {
-                redisResponseString = res;
-              }
+              const redisResponseString = res.body ? JSON.stringify(res) : res;
+
               redisClient.setex(endpoint, secondsToCache, redisResponseString) // 86400 is 24 hours in seconds
                 .then(() => resolve(res));
-            });
+            }).catch(err => reject(err));
           } else {
             resolve(JSON.parse(data));
           }
         })
         .catch((err) => {
           console.log('wot in tarnation ', err);
-          req(reqOptions).then(res => resolve(res));
+          req(reqOptions)
+            .then(res => resolve(res))
+            .catch(err => reject(err));
         });
     }
     else {
       req(reqOptions)
         .then(response => resolve(response))
-        .catch(err => resolve(err));
+        .catch(err => reject(err));
     }
   });
 };
