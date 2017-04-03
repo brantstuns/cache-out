@@ -4,7 +4,7 @@
   "description": "A response caching tool for those slow/flaky services that power our express apps",
   "main": "index.js",
   "engines": {
-    "node": "6.4.0"
+    "node": ">=6.4.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./tests/**/*Test.js && npm run lint",
