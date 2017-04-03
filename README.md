@@ -26,7 +26,7 @@ npm i cache-out --save
 | redisOptions | object | If no argument is passed a default ioredis client will be created | this is not required but if you want to specify you're redis setup (which you definitely are going to have to do at some point) then make sure it follows the [options object](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) specified for ioredis. Alternatively, you can pass in a pre instantiated redis client here too! Cache-out will use the passed in client if this is the case. |
 | secondsToCache | number | 86400 (which 24 hours in seconds) | The amount of time in seconds you want to cache the response in redis for |
 
-## Example useage:
+## Example usage:
 ```javascript
 const cacheOut = require('cache-out');
 const request = require('request-promise');
