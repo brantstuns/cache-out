@@ -20,12 +20,12 @@ module.exports = (req, reqOptions, storeConfig, secondsToCache = 86400) => {
       redisClient.get(endpoint)
         .then(data => {
           if (!data) {
-            req(reqOptions).then(res => {
+            return req(reqOptions).then(res => {
               const redisResponseString = res.body ? JSON.stringify(res) : res;
 
-              redisClient.setex(endpoint, secondsToCache, redisResponseString) // 86400 is 24 hours in seconds
+              return redisClient.setex(endpoint, secondsToCache, redisResponseString) // 86400 is 24 hours in seconds
                 .then(() => resolve(res));
-            }).catch(err => reject(err));
+            });
           } else {
             resolve(JSON.parse(data));
           }
